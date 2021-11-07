@@ -3,25 +3,26 @@ def find_user(user_name):
     with open('credentials.txt', 'r') as file:
         word = ''
         letter = file.read(1)
-        print(word+'\n')
         found = False
         while not found:
-            while (letter != '' and letter != ' ' and letter != '\n'):
+            while (letter != '' and letter != ' '):
                 word += letter
                 letter = file.read(1)
                 print(word+'\n')
+            if letter == '':
+                break
             if word == user_name:
                 found = True
+            while (letter != '\n'):
+                letter = file.read(1)
             letter = file.read(1)
             word = ''
         print("File End")
-        file.read(1)
-        file.read(1)
     return found
 
 def authenticate(user_name, password):
+    match = False
     if (find_user(user_name)):
-        match = False
         with open('credentials.txt', 'r') as file:
             word = ''
             letter = file.read(1)
