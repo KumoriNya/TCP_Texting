@@ -22,7 +22,11 @@ Features:
         $ logout
         ], 
         authentication protection (wrong password force quit and concurrent account usage protection), 
-        auto logout for idle user, 
+        auto logout for idle user[$ idle_detection:
+            if <user_nonresponse_time> > <timeout>: logout
+            wait.x
+            idle_detection
+        ], 
         presence broadcasts (behaviourly, notification for users), 
         show list of online users [$ Whoelse
             for <all online users>:
@@ -54,6 +58,19 @@ Features:
                 if <user> block <sender>: feedback to <sender>, message dumped
                 elif <user> invalid: feedback(error message) to <sender>, message dumped
             ],
-            message forwarding between users (assuming both ends are online), 
             offline messasge, 
-        
+    p2p message:
+        establish connection [$ startprivate <user>
+            if <user> offline: error message
+            else: requestConnect(<user>, <sender>)
+        ],
+        send p2p message [$ private <user> <message>
+            if <user> offline: error message
+            elif <user> not p2pconnect <sender>: error message
+            else: sender.sendPrivate(<message>, <user>)
+        ],
+        close connection [$ stopprivate <user>
+            if <user> offline: error message
+            elif no connection: error message
+            else: requestClose(<user>, <sender>)
+        ]
