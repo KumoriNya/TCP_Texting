@@ -1,5 +1,5 @@
 from data import data
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 def find_user(user_name):
     positionCounter = 0
@@ -56,6 +56,27 @@ def authenticate(user_name, password):
             if word == password:
                 match = True
     return match
+
+def block_user(user_name, duration):
+    data['blocked_user_rec'].append(
+        {
+            'user_name'     : user_name,
+            'block_until'   : datetime.now() + duration
+        }
+    )
+
+def block_check(user_name, now):
+    result = False
+    blocked_user_index = 0
+    for user in data['blocked_user_rec']:
+        if user_name == user['user_name']:
+            if now - user['block_until'] < 0:
+                result = True
+            else:
+                blocked_user_index += 1
+    if result:
+        data['blocked_user_rec'].remove(blocked_user_index)
+    return result
 
 def register(user_name, password):
     if (find_user(user_name) == -1):
@@ -119,6 +140,8 @@ def find_online_user_data_position(username):
             break
         else:
             index += 1
+    if index == len(data['online_users']):
+        index -= 1
     return index
 
 def handle_client_instruction(user_input):
@@ -138,4 +161,18 @@ def client_to_server_message(user_input):
         splitted = message.split()
     header  = splitted[0]
     body    = message[len(header) + 1:]
-    return (header, body)    
+    return (header, body)
+
+def distinguish(username, socket):
+    result = "no_user_yet"
+    if len(data['online_users']) > 0:
+        index = find_online_user_data_position(username)
+        # print(data['online_users'])
+        print(f"index = {index}")
+        if socket == data['online_users'][index]['speak']:
+            result = "speak"
+        elif socket == data['online_users'][index]['listen']:
+            result = "listen"
+        else:
+            result = "problem"
+    return result
